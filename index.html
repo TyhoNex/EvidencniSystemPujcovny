@@ -657,7 +657,14 @@ button.return:hover {
 	         scannerListener = null;
 	     }
 	     document.getElementById("scannerStatus").innerText = "Skener zastaven.";
-       
+
+	     // OPRAVA: Skryj a vyprázdni video
+	     let video = document.getElementById("video");
+	     video.classList.remove("active");
+	     video.srcObject = null;
+	     video.removeAttribute("src"); // pro jistotu na některých prohlížečích
+	     video.load();
+
 	     renderDevices();
 	 };
 
