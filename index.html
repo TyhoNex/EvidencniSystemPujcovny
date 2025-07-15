@@ -129,7 +129,29 @@ button.return:hover {
          .modal-content button[type="button"] { background: #adb5bd; margin-top: 10px;}
          body.modal-open { overflow: hidden;}
 	      
-	#scrollTopBtn {position: fixed; bottom: 20px;left: 20px;display:none; background-color: #ced4da; color: white; border: none; width: 30px; height: 30px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 50%; text-align: center; transition: all 0.3s ease-in-out; margin-left: 10px; display: flex; justify-content: center; align-items: flex-start; padding-top: 2px; }
+	#scrollTopBtn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  display: none;
+  background-color: #ced4da;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 50%;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;           /* DŮLEŽITÉ: žádný padding */
+  line-height: 1;       /* DŮLEŽITÉ: žádné svislé posunutí */
+  box-sizing: border-box;
+}
 	#scrollTopBtn:hover {background-color: #0056b3;}
 	mark {background-color: yellow;}
         mark.current {background-color: orange;}
@@ -151,6 +173,7 @@ button.return:hover {
       <div class="header">
          <h1>Evidenční systém půjčovny</h1>
       </div>
+      
       <div class="scan-buttons-container">
          <button class="scan-button" onclick="startScanner()">Spustit skener</button>
          <button class="scan-button" onclick="stopScanner()">Zastavit skener</button>
