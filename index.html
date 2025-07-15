@@ -67,15 +67,19 @@
       </style>
    </head>
    <body>
-      <div class="container">
-         <h1>Evidenční systém půjčovny</h1>
-         <div class="scan-buttons-container">
-            <button class="scan-button" onclick="startScanner()">Spustit skener</button>
-            <button class="scan-button" onclick="stopScanner()">Zastavit skener</button>
-         </div>
-         <video id="video" width="300" height="300" autoplay></video>
-         <p id="scannerStatus"></p>
-         <h2 style="display: inline-block;">Seznam zařízení</h2> <br>
+   <div class="container">
+      <!-- Přidáno logo -->
+      <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
+         <img src="logo.png" alt="Logo" style="max-width: 150px; width: 60vw; height: auto;">
+      </div>
+      <h1>Evidenční systém půjčovny</h1>
+      <div class="scan-buttons-container">
+         <button class="scan-button" onclick="startScanner()">Spustit skener</button>
+         <button class="scan-button" onclick="stopScanner()">Zastavit skener</button>
+      </div>
+      <video id="video" width="300" height="300" autoplay></video>
+      <p id="scannerStatus"></p>
+      <h2 style="display: inline-block;">Seznam zařízení</h2> <br>
 	 <button onclick="FindText()" class="manage-device">🔍</button>
          <button onclick="showAddDeviceDialog()" class="manage-device">+</button>
          <button onclick="showDeleteDeviceDialog()" class="manage-device">-</button>
