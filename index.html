@@ -97,7 +97,21 @@ button.return:hover {
          .device-status.available { color: green; }
          .device-status.loaned { color: red; }
          .manage-device { background-color: #ced4da; color: white; border: none; width: 30px; height: 30px; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 50%; text-align: center; transition: all 0.3s ease-in-out; margin-left: 10px; display: inline-flex; justify-content: center; align-items: center;}
-	 #video { width: 300px; height: 300px; object-fit: cover; border-radius: 10px;}
+	 #video {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: all 0.3s;
+  object-fit: cover;
+  border-radius: 10px;
+  margin: 0 auto 10px auto;
+  display: block;
+}
+#video.active {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+}
          .scan-buttons-container { display: flex; gap: 10px; justify-content: center;}
          .scan-button { background-color: #ced4da;color: black; border: none; font-size: 16px; cursor: pointer; border-radius: 5px; transition: all 0.3s ease-in-out; width: 150px; display: flex; align-items: center; justify-content: center; text-align: center; }
          
@@ -584,7 +598,7 @@ button.return:hover {
              scanning = true;
              document.getElementById("scannerStatus").innerText = "Spouštím skener...";
              let video = document.getElementById("video");
-             video.style.display = "block";
+             video.classList.add("active");
 
              navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                  .then(stream => {
@@ -613,8 +627,8 @@ button.return:hover {
                                  }
                                  // Skryje video po naskenování
                                  let video = document.getElementById("video");
-                                 video.style.display = "none";
-                                 video.srcObject = null;
+                                  video.classList.remove("active");
+                                  video.srcObject = null;
                                  highlightDevice(code.data);
                                  return;
                              }
@@ -643,6 +657,9 @@ button.return:hover {
 	         scannerListener = null;
 	     }
 	     document.getElementById("scannerStatus").innerText = "Skener zastaven.";
+       let video = document.getElementById("video");
+    video.classList.remove("active");
+    video.srcObject = null;
 	     renderDevices();
 	 };
 
