@@ -580,10 +580,10 @@ button.return:hover {
                     const container = deviceElement.querySelector('.device-container');
                     if (container) {
                       container.classList.add('highlight');
-                      setTimeout(() => container.classList.remove('highlight'), 1500);
+                      setTimeout(() => container.classList.remove('highlight'), 3000);
                     }
                   }
-                }, 50);
+                }, 300); // <-- zvýšeno z 50 na 300 ms
                 closeLoanModal();
               }).catch((error) => {
                 console.error("Chyba při půjčování zařízení:", error);
@@ -647,10 +647,10 @@ button.return:hover {
                         const container = deviceElement.querySelector('.device-container');
                         if (container) {
                             container.classList.add('highlight');
-                            setTimeout(() => container.classList.remove('highlight'), 1500);
+                            setTimeout(() => container.classList.remove('highlight'), 3000);
                         }
                     }
-                }, 50);
+                }, 300);
             }).catch((error) => {
                 console.error("Chyba při vrácení zařízení:", error);
             });
@@ -692,11 +692,12 @@ button.return:hover {
                                  if (videoStream) {
                                      videoStream.getTracks().forEach(track => track.stop());
                                  }
-                                 // Skryje video po naskenování
                                  let video = document.getElementById("video");
-                                  video.classList.remove("active");
-                                  video.srcObject = null;
-                                 highlightDevice(code.data);
+                                 video.classList.remove("active");
+                                 video.srcObject = null;
+                                 // Nejprve načti zařízení a pak zvýrazni
+                                 renderDevices();
+                                 setTimeout(() => highlightDevice(code.data), 100);
                                  return;
                              }
                          }
