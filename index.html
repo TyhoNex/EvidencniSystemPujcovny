@@ -3,7 +3,7 @@
    <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Evidenční systém půjčovny</title>
+      <title>ESL∙Evidenční systém půjčovny</title>
       <script src="https://cdn.jsdelivr.net/npm/jsqr"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -161,6 +161,123 @@ button.return:hover {
 	#searchModal input {
   font-size: 16px;
 }
+
+	/* Styling pro QR export modal */
+	#qrExportModal {
+	  position: fixed; 
+	  top: 0; 
+	  left: 0; 
+	  width: 100%; 
+	  height: 100%; 
+	  background: rgba(0, 0, 0, 0.5); 
+	  display: none; 
+	  justify-content: center; 
+	  align-items: center; 
+	  z-index: 1000; 
+	  overflow-y: auto;
+	}
+	
+	.qr-export-content {
+	  background: #fafdff;
+	  border-radius: 12px;
+	  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+	  padding: 20px;
+	  max-width: 500px;
+	  max-height: 80vh;
+	  overflow-y: auto;
+	  width: 90%;
+	}
+	
+	.device-checkbox {
+	  display: flex;
+	  align-items: center;
+	  margin: 8px 0;
+	  padding: 8px;
+	  border: 1px solid #e9ecef;
+	  border-radius: 5px;
+	  background: #f8f9fa;
+	}
+	
+	.device-checkbox input[type="checkbox"] {
+	  margin-right: 10px;
+	  transform: scale(1.2);
+	}
+	
+	.device-checkbox label {
+	  flex: 1;
+	  cursor: pointer;
+	  font-weight: normal;
+	}
+	
+	.select-buttons {
+	  display: flex;
+	  gap: 10px;
+	  margin: 15px 0;
+	}
+	
+	.select-buttons button {
+	  padding: 8px 16px;
+	  background: #6c757d;
+	  color: white;
+	  border: none;
+	  border-radius: 5px;
+	  cursor: pointer;
+	  font-size: 14px;
+	}
+	
+	.select-buttons button:hover {
+	  background: #5a6268;
+	}
+	
+	.scroll-down-btn {
+	  position: absolute;
+	  bottom: 80px;
+	  right: 20px;
+	  background: #007bff;
+	  color: white;
+	  border: none;
+	  width: 40px;
+	  height: 40px;
+	  border-radius: 50%;
+	  cursor: pointer;
+	  font-size: 18px;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+	  transition: all 0.3s ease;
+	  z-index: 10;
+	}
+	
+	.scroll-down-btn:hover {
+	  background: #0056b3;
+	  transform: scale(1.1);
+	}
+	
+	.scroll-up-btn {
+	  position: absolute;
+	  bottom: 130px;
+	  right: 20px;
+	  background: #28a745;
+	  color: white;
+	  border: none;
+	  width: 40px;
+	  height: 40px;
+	  border-radius: 50%;
+	  cursor: pointer;
+	  font-size: 18px;
+	  display: flex;
+	  align-items: center;
+	  justify-content: center;
+	  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+	  transition: all 0.3s ease;
+	  z-index: 10;
+	}
+	
+	.scroll-up-btn:hover {
+	  background: #218838;
+	  transform: scale(1.1);
+	}
 	   
       </style>
    </head>
@@ -184,7 +301,7 @@ button.return:hover {
 	 <button onclick="FindText()" class="manage-device">🔍</button>
 <button onclick="showAddDeviceDialog()" class="manage-device">➕</button>
 <button onclick="showDeleteDeviceDialog()" class="manage-device">➖</button>
-<button onclick="ExportDevice()" class="manage-device">QR</button>
+<button onclick="showQRExportModal()" class="manage-device">QR</button>
 <button onclick="ExportLoanHistory()" class="manage-device">📤</button>
 <button onclick="showHistoryModal()" class="manage-device">📜</button> <!-- Přidáno tlačítko historie -->
          <ul id="deviceList"></ul>
@@ -246,6 +363,31 @@ button.return:hover {
     <div id="historyList"><em>Načítám...</em></div>
   </div>
 </div>
+
+      <!-- QR Export Modal -->
+      <div id="qrExportModal">
+        <div class="qr-export-content">
+          <h2>Výběr zařízení pro export QR kódů</h2>
+          <div class="select-buttons">
+            <button onclick="selectAllDevices()">Vybrat vše</button>
+            <button onclick="deselectAllDevices()">Zrušit výběr</button>
+          </div>
+          <div id="deviceCheckboxList">
+            <!-- Zde se dynamicky vygenerují checkboxy -->
+          </div>
+          <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button onclick="exportSelectedQRCodes()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; flex: 1;">
+              Exportovat vybrané
+            </button>
+            <button onclick="closeQRExportModal()" style="background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+              Zrušit
+            </button>
+          </div>
+          <!-- Scroll tlačítka -->
+          <button class="scroll-up-btn" onclick="scrollToTop()" title="Scroll nahoru">↑</button>
+          <button class="scroll-down-btn" onclick="scrollToBottom()" title="Scroll dolů">↓</button>
+        </div>
+      </div>
 
 <button id="scrollTopBtn">↑</button>
 								
@@ -777,6 +919,289 @@ button.return:hover {
 	}
 
          
+         // QR Export Modal functions
+         window.showQRExportModal = function() {
+           const modal = document.getElementById("qrExportModal");
+           const checkboxList = document.getElementById("deviceCheckboxList");
+           
+           // Načtení zařízení z databáze
+           const devicesRef = ref(db, 'devices/');
+           get(devicesRef).then((snapshot) => {
+             if (snapshot.exists()) {
+               const devices = snapshot.val();
+               let html = '';
+               
+               Object.keys(devices).forEach((key) => {
+                 const device = devices[key];
+                 const statusText = device.status === "Dostupné" ? "Dostupné" : "Půjčeno";
+                 html += `
+                   <div class="device-checkbox">
+                     <input type="checkbox" id="device_${key}" value="${key}" checked>
+                     <label for="device_${key}">
+                       <strong>${device.name}</strong> - ${statusText}
+                       <br><small style="color: #666;">ID: ${key}</small>
+                     </label>
+                   </div>
+                 `;
+               });
+               
+               checkboxList.innerHTML = html;
+               modal.style.display = "flex";
+               document.body.classList.add("modal-open");
+               
+               // Nastavení scrollu na začátek modálu
+               const modalContent = document.querySelector('.qr-export-content');
+               if (modalContent) {
+                 modalContent.scrollTop = 0;
+               }
+               
+               // Přidání event listenerů pro klávesové zkratky
+               function handleKeyPress(event) {
+                 if (event.key === 'Escape') {
+                   closeQRExportModal();
+                 } else if (event.key === 'Enter') {
+                   exportSelectedQRCodes();
+                 }
+               }
+               
+               // Přidání event listeneru pro kliknutí mimo modal
+               function handleClickOutside(event) {
+                 const modalContent = document.querySelector('.qr-export-content');
+                 if (modal.style.display === 'flex' && !modalContent.contains(event.target)) {
+                   closeQRExportModal();
+                 }
+               }
+               
+               // Přidání event listenerů
+               document.addEventListener('keydown', handleKeyPress);
+               document.addEventListener('click', handleClickOutside);
+               
+               // Uložení referencí pro pozdější odstranění
+               modal.keyPressHandler = handleKeyPress;
+               modal.clickOutsideHandler = handleClickOutside;
+             } else {
+               alert("Žádná zařízení k exportu.");
+             }
+           }).catch((error) => {
+             console.error("Chyba při načítání zařízení:", error);
+             alert("Chyba při načítání zařízení.");
+           });
+         };
+
+         window.closeQRExportModal = function() {
+           const modal = document.getElementById("qrExportModal");
+           modal.style.display = "none";
+           document.body.classList.remove("modal-open");
+           
+           // Odstranění event listenerů
+           if (modal.keyPressHandler) {
+             document.removeEventListener('keydown', modal.keyPressHandler);
+             modal.keyPressHandler = null;
+           }
+           if (modal.clickOutsideHandler) {
+             document.removeEventListener('click', modal.clickOutsideHandler);
+             modal.clickOutsideHandler = null;
+           }
+         };
+
+         window.selectAllDevices = function() {
+           const checkboxes = document.querySelectorAll('#deviceCheckboxList input[type="checkbox"]');
+           checkboxes.forEach(checkbox => {
+             checkbox.checked = true;
+           });
+         };
+
+         window.deselectAllDevices = function() {
+           const checkboxes = document.querySelectorAll('#deviceCheckboxList input[type="checkbox"]');
+           checkboxes.forEach(checkbox => {
+             checkbox.checked = false;
+           });
+         };
+
+         window.exportSelectedQRCodes = function() {
+           const checkboxes = document.querySelectorAll('#deviceCheckboxList input[type="checkbox"]:checked');
+           const selectedDevices = Array.from(checkboxes).map(cb => cb.value);
+           
+           if (selectedDevices.length === 0) {
+             alert("Prosím vyberte alespoň jedno zařízení pro export.");
+             return;
+           }
+           
+           // Zavřít modal
+           closeQRExportModal();
+           
+           // Exportovat vybrané QR kódy
+           exportQRCodes(selectedDevices);
+         };
+
+         window.scrollToBottom = function() {
+           const modal = document.querySelector('.qr-export-content');
+           modal.scrollTo({
+             top: modal.scrollHeight,
+             behavior: 'smooth'
+           });
+         };
+
+         window.scrollToTop = function() {
+           const modal = document.querySelector('.qr-export-content');
+           modal.scrollTo({
+             top: 0,
+             behavior: 'smooth'
+           });
+         };
+
+         function exportQRCodes(deviceIds) {
+           const { jsPDF } = window.jspdf;
+           const doc = new jsPDF();
+           
+           // URL obrázku loga
+           const logoURL = "https://raw.githubusercontent.com/TyhoNex/EvidencniSystemPujcovny/refs/heads/main/logo.png";
+           
+           // Funkce pro načtení loga z URL
+           function loadLogoFromURL() {
+             return new Promise((resolve) => {
+               const img = new Image();
+               img.crossOrigin = "anonymous"; // Důležité pro CORS
+               
+               img.onload = function() {
+                 console.log("Logo úspěšně načteno z URL");
+                 // Převedeme obrázek na canvas a pak na base64
+                 const canvas = document.createElement('canvas');
+                 const ctx = canvas.getContext('2d');
+                 canvas.width = img.width;
+                 canvas.height = img.height;
+                 ctx.drawImage(img, 0, 0);
+                 
+                 try {
+                   const dataURL = canvas.toDataURL('image/png');
+                   console.log("Logo převedeno na base64, délka:", dataURL.length);
+                   resolve(dataURL);
+                 } catch(e) {
+                   console.error("Chyba při převodu na base64:", e);
+                   resolve(null);
+                 }
+               };
+               
+               img.onerror = function() {
+                 console.error("Chyba při načítání loga z URL - zkouším fetch");
+                 // Záložní metoda s fetch
+                 fetch(logoURL)
+                   .then(response => response.blob())
+                   .then(blob => {
+                     const reader = new FileReader();
+                     reader.onload = function() {
+                       console.log("Logo načteno pomocí fetch");
+                       resolve(reader.result);
+                     };
+                     reader.onerror = function() {
+                       console.error("Fetch metoda také selhala");
+                       resolve(null);
+                     };
+                     reader.readAsDataURL(blob);
+                   })
+                   .catch(err => {
+                     console.error("Fetch chyba:", err);
+                     resolve(null);
+                   });
+               };
+               
+               img.src = logoURL;
+             });
+           }
+           
+           const qrPromises = deviceIds.map((deviceId) => generateQRCode(deviceId));
+
+           // Načteme logo a QR kódy současně
+           Promise.all([loadLogoFromURL(), ...qrPromises]).then((results) => {
+             const logoDataURL = results[0]; // První výsledek je logo
+             const qrDataArray = results.slice(1); // Zbytek jsou QR kódy
+             
+             console.log("Logo pro PDF:", logoDataURL ? "načteno" : "není k dispozici");
+             
+             let x = 0, y = 0;
+             const itemWidth = 55, itemHeight = 75, spacingX = -2.5, spacingY = -4.25;
+             const pageWidth = doc.internal.pageSize.width;
+             const pageHeight = doc.internal.pageSize.height;
+             let counter = 0;
+
+             qrDataArray.forEach(({ key, imgData }) => {
+               // Pro 4x4 layout - nová stránka po každých 16 položkách
+               if (counter > 0 && counter % 16 === 0) {
+                 doc.addPage();
+                 x = 0;
+                 y = 0;
+               }
+
+               // Šířka oblasti pro číslo a logo (stejná jako QR kód)
+               const qrWidth = itemWidth - 20; // 35mm
+               const qrStartX = x + 2;
+               const qrStartY = y + 2;
+
+               // 1. Číslo vlevo v oblasti QR kódu
+               doc.setFontSize(36);
+               doc.setFont("helvetica", "bold");
+               doc.text(`${counter}`, qrStartX, qrStartY + 18, { align: 'left' });
+
+               // 2. Logo vpravo v oblasti QR kódu (pokud je k dispozici)
+               if (logoDataURL) {
+                 try {
+                   console.log("Vkládám logo pro item", counter);
+                   // Logo umístíme do pravé části oblasti QR kódu
+                   const logoWidth = qrWidth * 0.6; // 60% šířky QR oblasti
+                   const logoHeight = 12; // Zmenšená výška pro lepší proporce
+                   const logoX = qrStartX + qrWidth - logoWidth;
+                   doc.addImage(logoDataURL, "PNG", logoX, qrStartY + 8, logoWidth, logoHeight);
+                 } catch(e) {
+                   console.error("Chyba při vkládání loga do PDF:", e);
+                   // Fallback text vpravo v oblasti QR kódu
+                   doc.setFontSize(10);
+                   doc.setFont("helvetica", "bold");
+                   doc.text("ESL", qrStartX + qrWidth - 10, qrStartY + 10, { align: 'right' });
+                   doc.setFontSize(8);
+                   doc.setFont("helvetica", "normal");
+                   doc.text("technická zařízení budov", qrStartX + qrWidth - 10, qrStartY + 16, { align: 'right' });
+                 }
+               } else {
+                 console.log("Logo není k dispozici pro item", counter, "- používám text");
+                 // Pokud není logo, zobrazíme název firmy vpravo v oblasti QR kódu
+                 doc.setFontSize(10);
+                 doc.setFont("helvetica", "bold");
+                 doc.text("ESL", qrStartX + qrWidth - 10, qrStartY + 10, { align: 'right' });
+                 doc.setFontSize(8);
+                 doc.setFont("helvetica", "normal");
+                 doc.text("technická zařízení budov", qrStartX + qrWidth - 10, qrStartY + 16, { align: 'right' });
+               }
+
+               // 3. ID pod číslem a logem (uprostřed QR oblasti)
+               doc.setFontSize(8);
+               doc.setFont("helvetica", "normal");
+               doc.text(`${counter} | ID: ${key}`, qrStartX + qrWidth/2, qrStartY + 26, { align: 'center' });
+
+               // 4. QR kód dole pod celým obsahem (používá stejnou šířku)
+               if (imgData) {
+                 doc.addImage(imgData, "PNG", qrStartX, qrStartY + 30, qrWidth, qrWidth);
+               }
+
+               // Posun na další pozici
+               x += itemWidth + spacingX;
+               // Pro 4x4 layout - po 4 položkách přejdi na nový řádek
+               if ((counter + 1) % 4 === 0) {
+                 x = 0;
+                 y += itemHeight + spacingY;
+               }
+
+               counter++;
+             });
+
+             doc.save("QR_kody_vyber.pdf");
+             console.log("PDF vygenerováno s", counter, "QR kódy, logo:", logoDataURL ? "vloženo" : "nebylo k dispozici");
+           }).catch((error) => {
+             console.error("Chyba při generování QR kódů:", error);
+             alert("Chyba při generování PDF.");
+           });
+         }
+         
+
          window.ExportDevice = function() {
              const { jsPDF } = window.jspdf;
              const doc = new jsPDF();
@@ -790,36 +1215,9 @@ button.return:hover {
 
                  const devices = snapshot.val();
                  const keys = Object.keys(devices);
-                 const qrPromises = keys.map((key) => generateQRCode(key));
-
-                 Promise.all(qrPromises).then((qrDataArray) => {
-                     let x = 10, y = 10;
-                     const qrSize = 25, spacing = 10;
-                     const pageWidth = doc.internal.pageSize.width;
-                     const pageHeight = doc.internal.pageSize.height;
-                     let counter = 0; // Pořadové číslo začínáme na 0
-
-                     qrDataArray.forEach(({ key, imgData }) => {
-                         doc.setFontSize(7);  // Nastaví velikost písma na 8 bodů
-                         doc.text(`${counter}. ID: ${key}`, x, y); // Přidáme pořadové číslo před ID
-                         doc.addImage(imgData, "PNG", x, y+1, qrSize, qrSize);
-
-                         x += qrSize + spacing;
-                         if (x + qrSize > pageWidth - 10) {
-                             x = 10;
-                             y += qrSize + spacing;
-                         }
-                         if (y + qrSize > pageHeight - 10) {
-                             doc.addPage();
-                             x = 10;
-                             y = 10;
-                         }
-
-                         counter++; // Inkrementace čítače pro další QR kód
-                     });
-
-                     doc.save("QR_kody.pdf");
-                 });
+                 
+                 // Použijeme novou funkci exportQRCodes pro všechna zařízení
+                 exportQRCodes(keys);
              }).catch((error) => {
                  console.error("Chyba při načítání zařízení:", error);
              });
