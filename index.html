@@ -20,7 +20,9 @@
          body {
   font-family: Calibri, sans-serif;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
   /* Jemné šedobílé diagonální čáry na pozadí */
   background-color: #f6f7fa;
   background-image: repeating-linear-gradient(
@@ -53,7 +55,7 @@ button.return:hover {
          button {width: 100px; padding: 10px; margin: 5px; border: none; font-size: 16px; cursor: pointer; border-radius: 5px; }
          button.loan { background-color: #28a745; color: white; }
          button.return { background-color: #dc3545; color: white; }
-         .container {max-width: 600px; width: 100%; padding: 20px; box-sizing: border-box;}
+         .container {max-width: 600px; width: 100%; padding: 20px; box-sizing: border-box; flex: 1;}
          .device-container { 
   display: flex; 
   flex-direction: column; 
@@ -2072,5 +2074,11 @@ document.getElementById('searchTerm').addEventListener('keydown', function(e) {
 });
 	
       </script>
+
+<!-- Footer s osobní značkou - viditelný jen na konci stránky -->
+<div style="text-align: center; margin-top: auto; padding: 20px; font-size: 12px; color: #666; font-family: Arial, sans-serif; border-top: 1px solid #e9ecef;">
+  ESL a.s. ∙ Bc. Tylšar Jan
+</div>
+
    </body>
 </html>
