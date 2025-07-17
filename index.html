@@ -8,7 +8,10 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<<<<<<< HEAD
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+=======
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
 			<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 			<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 			<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -279,6 +282,7 @@ button.return:hover {
 	  background: #218838;
 	  transform: scale(1.1);
 	}
+<<<<<<< HEAD
 
 	/* Styling pro Metrics modal */
 	#metricsModal {
@@ -416,6 +420,8 @@ button.return:hover {
 	    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 	  }
 	}
+=======
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
 	   
       </style>
    </head>
@@ -441,8 +447,12 @@ button.return:hover {
 <button onclick="showDeleteDeviceDialog()" class="manage-device">➖</button>
 <button onclick="showQRExportModal()" class="manage-device">QR</button>
 <button onclick="ExportLoanHistory()" class="manage-device">📤</button>
+<<<<<<< HEAD
 <button onclick="showHistoryModal()" class="manage-device">📜</button>
 <button onclick="showMetricsModal()" class="manage-device">📊</button> <!-- Přidáno tlačítko historie -->
+=======
+<button onclick="showHistoryModal()" class="manage-device">📜</button> <!-- Přidáno tlačítko historie -->
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
          <ul id="deviceList"></ul>
       </div>
 
@@ -451,7 +461,11 @@ button.return:hover {
   		<button onclick="nextMatch()">Další</button>
   		<button onclick="closeSearch()">Zavřít</button>
 	</div>
+<<<<<<< HEAD
 
+=======
+	   
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
 	   
       <div id="loanModal" style="display:none;">
         <div class="modal-content">
@@ -528,6 +542,7 @@ button.return:hover {
         </div>
       </div>
 
+<<<<<<< HEAD
       <!-- Metrics Modal -->
       <div id="metricsModal">
         <div class="metrics-content">
@@ -565,6 +580,8 @@ button.return:hover {
         </div>
       </div>
 
+=======
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
 <button id="scrollTopBtn">↑</button>
 								
 <script type="module">
@@ -592,6 +609,7 @@ button.return:hover {
             document.getElementById("historyModal").style.display = "flex";
             document.body.classList.add("modal-open");
             renderHistory();
+<<<<<<< HEAD
             
             // Jednoduchý event listener pro ESC
             function handleEscKey(event) {
@@ -616,11 +634,14 @@ button.return:hover {
             // Uložení referencí pro pozdější odstranění
             window.historyModalEscListener = handleEscKey;
             window.historyModalClickListener = handleClickOutside;
+=======
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
           };
 
           window.closeHistoryModal = function() {
             document.getElementById("historyModal").style.display = "none";
             document.body.classList.remove("modal-open");
+<<<<<<< HEAD
             
             // Odstranění event listenerů
             if (window.historyModalEscListener) {
@@ -631,6 +652,8 @@ button.return:hover {
               document.removeEventListener('click', window.historyModalClickListener);
               window.historyModalClickListener = null;
             }
+=======
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
           };
 
           function renderHistory() {
@@ -729,12 +752,18 @@ button.return:hover {
 
     get(deviceRef).then((snapshot) => {
         if (snapshot.exists()) {
+<<<<<<< HEAD
             const currentDevice = snapshot.val();
             const oldName = currentDevice.name;
             let newName = prompt("Zadejte nový název zařízení:");
             
             if (newName) {
                 // Aktualizace zařízení
+=======
+            let newName = prompt("Zadejte nový název zařízení:");
+            //let newNote = prompt("Zadejte poznámku k zařízení:", snapshot.val().note || "");
+            if (newName) {
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
                 set(deviceRef, {
                     name: newName,
                     status: "Dostupné",
@@ -743,6 +772,7 @@ button.return:hover {
                     loanDate: "",
                     company: "",
                     phone: "",
+<<<<<<< HEAD
                     note: ""
                 }).then(() => {
                     console.log("Zařízení bylo úspěšně aktualizováno.");
@@ -780,6 +810,12 @@ button.return:hover {
                         console.error("Chyba při načítání historie:", error);
                         renderDevices();
                     });
+=======
+                    note: "" // <-- Přidáno pole Poznámka
+                }).then(() => {
+                    console.log("Zařízení bylo úspěšně aktualizováno.");
+                    renderDevices();
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
                 }).catch((error) => {
                     console.error("Chyba při aktualizaci zařízení:", error);
                 });
@@ -1165,6 +1201,7 @@ button.return:hover {
 	}
 
          
+<<<<<<< HEAD
          // Metrics Modal functions
          let utilizationChart = null;
          let trendChart = null;
@@ -1482,6 +1519,8 @@ button.return:hover {
            window.renderingCharts = false;
          }
 
+=======
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
          // QR Export Modal functions
          window.showQRExportModal = function() {
            const modal = document.getElementById("qrExportModal");
@@ -1694,6 +1733,10 @@ button.return:hover {
                  x = 0;
                  y = 0;
                }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
                // Šířka oblasti pro číslo a logo (stejná jako QR kód)
                const qrWidth = itemWidth - 20; // 35mm
                const qrStartX = x + 2;
@@ -1867,6 +1910,7 @@ button.return:hover {
          window.FindText = function () {
            document.getElementById('searchModal').style.display = 'block';
            document.getElementById('searchTerm').focus();
+<<<<<<< HEAD
            
            // Event listener pro ESC klávesy
            function handleEscKey(event) {
@@ -1880,6 +1924,8 @@ button.return:hover {
            
            // Uložení reference pro pozdější odstranění
            window.searchModalEscListener = handleEscKey;
+=======
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
          };
 
          window.closeSearch = function () {
@@ -1888,12 +1934,15 @@ button.return:hover {
            window.matches = [];
            window.currentIndex = -1;
            window.lastSearchTerm = "";
+<<<<<<< HEAD
            
            // Odstranění event listeneru pro ESC
            if (window.searchModalEscListener) {
              document.removeEventListener('keydown', window.searchModalEscListener);
              window.searchModalEscListener = null;
            }
+=======
+>>>>>>> 2ae0024492329e8048b1d3a48c683b39372b7919
          };
 
          // Odstraní všechny <mark> tagy (zvýraznění)
