@@ -439,6 +439,7 @@ button.return:hover {
 	 <button onclick="FindText()" class="manage-device">🔍</button>
 <button onclick="showAddDeviceDialog()" class="manage-device">➕</button>
 <button onclick="showDeleteDeviceDialog()" class="manage-device">➖</button>
+<button onclick="showEditDeviceDialog()" class="manage-device">🔧</button>
 <button onclick="showQRExportModal()" class="manage-device">QR</button>
 <button onclick="ExportLoanHistory()" class="manage-device">📤</button>
 <button onclick="showHistoryModal()" class="manage-device">📜</button>
@@ -715,14 +716,14 @@ button.return:hover {
          });
          };
          
-         window.showDeleteDeviceDialog = function() {
-         const deviceId = prompt("Zadejte ID zařízení, které chcete smazat:");
+         window.showEditDeviceDialog = function() {
+         const deviceId = prompt("Zadejte ID zařízení, které chcete přejmenovat:");
          if (deviceId) {
-         deleteDevice(deviceId);
+         editDevice(deviceId);
          }
          };
-         
-         window.deleteDevice = function(id) {
+
+         window.editDevice = function(id) {
     if (!id) return;
 
     const deviceRef = ref(db, 'devices/' + id);
@@ -731,21 +732,21 @@ button.return:hover {
         if (snapshot.exists()) {
             const currentDevice = snapshot.val();
             const oldName = currentDevice.name;
-            let newName = prompt("Zadejte nový název zařízení:");
+            let newName = prompt("Zadejte nový název zařízení:", oldName);
             
-            if (newName) {
+            if (newName && newName !== oldName) {
                 // Aktualizace zařízení
                 set(deviceRef, {
                     name: newName,
-                    status: "Dostupné",
-                    loanedBy: "",
-                    loanedTo: "",
-                    loanDate: "",
-                    company: "",
-                    phone: "",
-                    note: ""
+                    status: currentDevice.status,
+                    loanedBy: currentDevice.loanedBy,
+                    loanedTo: currentDevice.loanedTo,
+                    loanDate: currentDevice.loanDate,
+                    company: currentDevice.company,
+                    phone: currentDevice.phone,
+                    note: currentDevice.note
                 }).then(() => {
-                    console.log("Zařízení bylo úspěšně aktualizováno.");
+                    console.log("Zařízení bylo úspěšně přejmenováno.");
                     
                     // Aktualizace historie půjček - změna názvu ve všech záznamech
                     const loanHistoryRef = ref(db, 'loanHistory/');
@@ -781,10 +782,85 @@ button.return:hover {
                         renderDevices();
                     });
                 }).catch((error) => {
-                    console.error("Chyba při aktualizaci zařízení:", error);
+                    console.error("Chyba při přejmenování zařízení:", error);
                 });
-            } else {
+            } else if (newName === "") {
                 alert("Název zařízení nesmí být prázdný.");
+            }
+        } else {
+            alert("Zařízení s tímto ID neexistuje.");
+        }
+    }).catch((error) => {
+        console.error("Chyba při načítání zařízení:", error);
+    });
+};
+         
+         window.showDeleteDeviceDialog = function() {
+         const deviceId = prompt("Zadejte ID zařízení, které chcete smazat:");
+         if (deviceId) {
+         deleteDevice(deviceId);
+         }
+         };
+         
+         window.deleteDevice = function(id) {
+    if (!id) return;
+
+    const deviceRef = ref(db, 'devices/' + id);
+
+    get(deviceRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const currentDevice = snapshot.val();
+            const deviceName = currentDevice.name;
+            
+            // Potvrzení smazání
+            if (confirm(`Opravdu chcete smazat zařízení "${deviceName}"? Tato akce je nevratná.`)) {
+                
+                // Smazání zařízení z databáze
+                remove(deviceRef).then(() => {
+                    console.log("Zařízení bylo úspěšně smazáno.");
+                    
+                    // Smazání všech záznamů tohoto zařízení z historie půjček
+                    const loanHistoryRef = ref(db, 'loanHistory/');
+                    get(loanHistoryRef).then((historySnapshot) => {
+                        if (historySnapshot.exists()) {
+                            const historyData = historySnapshot.val();
+                            const deletionPromises = [];
+                            
+                            // Projdi všechny záznamy historie a smaž ty, které patří k tomuto zařízení
+                            Object.keys(historyData).forEach(historyKey => {
+                                if (historyData[historyKey].name === deviceName) {
+                                    deletionPromises.push(remove(ref(db, `loanHistory/${historyKey}`)));
+                                }
+                            });
+                            
+                            // Provedení hromadného smazání
+                            if (deletionPromises.length > 0) {
+                                Promise.all(deletionPromises).then(() => {
+                                    console.log("Historie půjček byla aktualizována.");
+                                    renderDevices();
+                                    alert(`Zařízení "${deviceName}" bylo úspěšně smazáno včetně historie.`);
+                                }).catch((error) => {
+                                    console.error("Chyba při mazání historie:", error);
+                                    renderDevices();
+                                    alert(`Zařízení "${deviceName}" bylo smazáno, ale při mazání historie došlo k chybě.`);
+                                });
+                            } else {
+                                renderDevices();
+                                alert(`Zařízení "${deviceName}" bylo úspěšně smazáno.`);
+                            }
+                        } else {
+                            renderDevices();
+                            alert(`Zařízení "${deviceName}" bylo úspěšně smazáno.`);
+                        }
+                    }).catch((error) => {
+                        console.error("Chyba při načítání historie:", error);
+                        renderDevices();
+                        alert(`Zařízení "${deviceName}" bylo smazáno, ale při kontrole historie došlo k chybě.`);
+                    });
+                }).catch((error) => {
+                    console.error("Chyba při mazání zařízení:", error);
+                    alert("Došlo k chybě při mazání zařízení.");
+                });
             }
         } else {
             alert("Zařízení s tímto ID neexistuje.");
