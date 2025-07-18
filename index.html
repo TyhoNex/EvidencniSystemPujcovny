@@ -1698,102 +1698,132 @@ button.return:hover {
            // URL obrázku loga
            const logoURL = "https://raw.githubusercontent.com/TyhoNex/EvidencniSystemPujcovny/refs/heads/main/logo.png";
            
-           // Funkce pro načtení loga z URL
-           function loadLogoFromURL() {
-             return new Promise((resolve) => {
-               const img = new Image();
-               img.crossOrigin = "anonymous"; // Důležité pro CORS
-               
-               img.onload = function() {
-                 console.log("Logo úspěšně načteno z URL");
-                 // Převedeme obrázek na canvas a pak na base64
-                 const canvas = document.createElement('canvas');
-                 const ctx = canvas.getContext('2d');
-                 canvas.width = img.width;
-                 canvas.height = img.height;
-                 ctx.drawImage(img, 0, 0);
-                 
-                 try {
-                   const dataURL = canvas.toDataURL('image/png');
-                   console.log("Logo převedeno na base64, délka:", dataURL.length);
-                   resolve(dataURL);
-                 } catch(e) {
-                   console.error("Chyba při převodu na base64:", e);
-                   resolve(null);
-                 }
-               };
-               
-               img.onerror = function() {
-                 console.error("Chyba při načítání loga z URL - zkouším fetch");
-                 // Záložní metoda s fetch
-                 fetch(logoURL)
-                   .then(response => response.blob())
-                   .then(blob => {
-                     const reader = new FileReader();
-                     reader.onload = function() {
-                       console.log("Logo načteno pomocí fetch");
-                       resolve(reader.result);
-                     };
-                     reader.onerror = function() {
-                       console.error("Fetch metoda také selhala");
-                       resolve(null);
-                     };
-                     reader.readAsDataURL(blob);
-                   })
-                   .catch(err => {
-                     console.error("Fetch chyba:", err);
-                     resolve(null);
-                   });
-               };
-               
-               img.src = logoURL;
+           // Načteme všechna zařízení z databáze pro získání správného pořadí
+           const devicesRef = ref(db, 'devices/');
+           get(devicesRef).then((snapshot) => {
+             if (!snapshot.exists()) {
+               alert("Žádná zařízení k exportu.");
+               return;
+             }
+             
+             const allDevices = snapshot.val();
+             const allDeviceIds = Object.keys(allDevices);
+             
+             // Vytvoříme mapování ID zařízení na pořadové číslo v databázi
+             const deviceOrderMap = {};
+             allDeviceIds.forEach((deviceId, index) => {
+               deviceOrderMap[deviceId] = index + 1; // Pořadové číslo začíná od 1
              });
-           }
-           
-           const qrPromises = deviceIds.map((deviceId) => generateQRCode(deviceId));
-
-           // Načteme logo a QR kódy současně
-           Promise.all([loadLogoFromURL(), ...qrPromises]).then((results) => {
-             const logoDataURL = results[0]; // První výsledek je logo
-             const qrDataArray = results.slice(1); // Zbytek jsou QR kódy
              
-             console.log("Logo pro PDF:", logoDataURL ? "načteno" : "není k dispozici");
+             // Funkce pro načtení loga z URL
+             function loadLogoFromURL() {
+               return new Promise((resolve) => {
+                 const img = new Image();
+                 img.crossOrigin = "anonymous"; // Důležité pro CORS
+                 
+                 img.onload = function() {
+                   console.log("Logo úspěšně načteno z URL");
+                   // Převedeme obrázek na canvas a pak na base64
+                   const canvas = document.createElement('canvas');
+                   const ctx = canvas.getContext('2d');
+                   canvas.width = img.width;
+                   canvas.height = img.height;
+                   ctx.drawImage(img, 0, 0);
+                   
+                   try {
+                     const dataURL = canvas.toDataURL('image/png');
+                     console.log("Logo převedeno na base64, délka:", dataURL.length);
+                     resolve(dataURL);
+                   } catch(e) {
+                     console.error("Chyba při převodu na base64:", e);
+                     resolve(null);
+                   }
+                 };
+                 
+                 img.onerror = function() {
+                   console.error("Chyba při načítání loga z URL - zkouším fetch");
+                   // Záložní metoda s fetch
+                   fetch(logoURL)
+                     .then(response => response.blob())
+                     .then(blob => {
+                       const reader = new FileReader();
+                       reader.onload = function() {
+                         console.log("Logo načteno pomocí fetch");
+                         resolve(reader.result);
+                       };
+                       reader.onerror = function() {
+                         console.error("Fetch metoda také selhala");
+                         resolve(null);
+                       };
+                       reader.readAsDataURL(blob);
+                     })
+                     .catch(err => {
+                       console.error("Fetch chyba:", err);
+                       resolve(null);
+                     });
+                 };
+                 
+                 img.src = logoURL;
+               });
+             }
              
-             let x = 0, y = 0;
-             const itemWidth = 55, itemHeight = 75, spacingX = -2.5, spacingY = -4.25;
-             const pageWidth = doc.internal.pageSize.width;
-             const pageHeight = doc.internal.pageSize.height;
-             let counter = 0;
+             const qrPromises = deviceIds.map((deviceId) => generateQRCode(deviceId));
 
-             qrDataArray.forEach(({ key, imgData }) => {
-               // Pro 4x4 layout - nová stránka po každých 16 položkách
-               if (counter > 0 && counter % 16 === 0) {
-                 doc.addPage();
-                 x = 0;
-                 y = 0;
-               }
-               // Šířka oblasti pro číslo a logo (stejná jako QR kód)
-               const qrWidth = itemWidth - 20; // 35mm
-               const qrStartX = x + 2;
-               const qrStartY = y + 2;
+             // Načteme logo a QR kódy současně
+             Promise.all([loadLogoFromURL(), ...qrPromises]).then((results) => {
+               const logoDataURL = results[0]; // První výsledek je logo
+               const qrDataArray = results.slice(1); // Zbytek jsou QR kódy
+               
+               console.log("Logo pro PDF:", logoDataURL ? "načteno" : "není k dispozici");
+               
+               let x = 0, y = 0;
+               const itemWidth = 55, itemHeight = 75, spacingX = -2.5, spacingY = -4.25;
+               const pageWidth = doc.internal.pageSize.width;
+               const pageHeight = doc.internal.pageSize.height;
+               let exportCounter = 0;
 
-               // 1. Číslo vlevo v oblasti QR kódu
-               doc.setFontSize(36);
-               doc.setFont("helvetica", "bold");
-               doc.text(`${counter}`, qrStartX, qrStartY + 18, { align: 'left' });
+               qrDataArray.forEach(({ key, imgData }) => {
+                 // Pro 4x4 layout - nová stránka po každých 16 položkách
+                 if (exportCounter > 0 && exportCounter % 16 === 0) {
+                   doc.addPage();
+                   x = 0;
+                   y = 0;
+                 }
+                 // Šířka oblasti pro číslo a logo (stejná jako QR kód)
+                 const qrWidth = itemWidth - 20; // 35mm
+                 const qrStartX = x + 2;
+                 const qrStartY = y + 2;
 
-               // 2. Logo vpravo v oblasti QR kódu (pokud je k dispozici)
-               if (logoDataURL) {
-                 try {
-                   console.log("Vkládám logo pro item", counter);
-                   // Logo umístíme do pravé části oblasti QR kódu
-                   const logoWidth = qrWidth * 0.6; // 60% šířky QR oblasti
-                   const logoHeight = 12; // Zmenšená výška pro lepší proporce
-                   const logoX = qrStartX + qrWidth - logoWidth;
-                   doc.addImage(logoDataURL, "PNG", logoX, qrStartY + 8, logoWidth, logoHeight);
-                 } catch(e) {
-                   console.error("Chyba při vkládání loga do PDF:", e);
-                   // Fallback text vpravo v oblasti QR kódu
+                 // Získáme správné pořadové číslo z databáze
+                 const databaseOrder = deviceOrderMap[key] || 'N/A';
+
+                 // 1. Číslo vlevo v oblasti QR kódu - používáme pořadové číslo z databáze
+                 doc.setFontSize(36);
+                 doc.setFont("helvetica", "bold");
+                 doc.text(`${databaseOrder}`, qrStartX, qrStartY + 18, { align: 'left' });
+
+                 // 2. Logo vpravo v oblasti QR kódu (pokud je k dispozici)
+                 if (logoDataURL) {
+                   try {
+                     console.log("Vkládám logo pro item", databaseOrder);
+                     // Logo umístíme do pravé části oblasti QR kódu
+                     const logoWidth = qrWidth * 0.6; // 60% šířky QR oblasti
+                     const logoHeight = 12; // Zmenšená výška pro lepší proporce
+                     const logoX = qrStartX + qrWidth - logoWidth;
+                     doc.addImage(logoDataURL, "PNG", logoX, qrStartY + 8, logoWidth, logoHeight);
+                   } catch(e) {
+                     console.error("Chyba při vkládání loga do PDF:", e);
+                     // Fallback text vpravo v oblasti QR kódu
+                     doc.setFontSize(10);
+                     doc.setFont("helvetica", "bold");
+                     doc.text("ESL", qrStartX + qrWidth - 10, qrStartY + 10, { align: 'right' });
+                     doc.setFontSize(8);
+                     doc.setFont("helvetica", "normal");
+                     doc.text("technická zařízení budov", qrStartX + qrWidth - 10, qrStartY + 16, { align: 'right' });
+                   }
+                 } else {
+                   console.log("Logo není k dispozici pro item", databaseOrder, "- používám text");
+                   // Pokud není logo, zobrazíme název firmy vpravo v oblasti QR kódu
                    doc.setFontSize(10);
                    doc.setFont("helvetica", "bold");
                    doc.text("ESL", qrStartX + qrWidth - 10, qrStartY + 10, { align: 'right' });
@@ -1801,43 +1831,37 @@ button.return:hover {
                    doc.setFont("helvetica", "normal");
                    doc.text("technická zařízení budov", qrStartX + qrWidth - 10, qrStartY + 16, { align: 'right' });
                  }
-               } else {
-                 console.log("Logo není k dispozici pro item", counter, "- používám text");
-                 // Pokud není logo, zobrazíme název firmy vpravo v oblasti QR kódu
-                 doc.setFontSize(10);
-                 doc.setFont("helvetica", "bold");
-                 doc.text("ESL", qrStartX + qrWidth - 10, qrStartY + 10, { align: 'right' });
+
+                 // 3. ID pod číslem a logem (uprostřed QR oblasti) - používáme pořadové číslo z databáze
                  doc.setFontSize(8);
                  doc.setFont("helvetica", "normal");
-                 doc.text("technická zařízení budov", qrStartX + qrWidth - 10, qrStartY + 16, { align: 'right' });
-               }
+                 doc.text(`${databaseOrder} | ID: ${key}`, qrStartX + qrWidth/2, qrStartY + 26, { align: 'center' });
 
-               // 3. ID pod číslem a logem (uprostřed QR oblasti)
-               doc.setFontSize(8);
-               doc.setFont("helvetica", "normal");
-               doc.text(`${counter} | ID: ${key}`, qrStartX + qrWidth/2, qrStartY + 26, { align: 'center' });
+                 // 4. QR kód dole pod celým obsahem (používá stejnou šířku)
+                 if (imgData) {
+                   doc.addImage(imgData, "PNG", qrStartX, qrStartY + 30, qrWidth, qrWidth);
+                 }
 
-               // 4. QR kód dole pod celým obsahem (používá stejnou šířku)
-               if (imgData) {
-                 doc.addImage(imgData, "PNG", qrStartX, qrStartY + 30, qrWidth, qrWidth);
-               }
+                 // Posun na další pozici
+                 x += itemWidth + spacingX;
+                 // Pro 4x4 layout - po 4 položkách přejdi na nový řádek
+                 if ((exportCounter + 1) % 4 === 0) {
+                   x = 0;
+                   y += itemHeight + spacingY;
+                 }
 
-               // Posun na další pozici
-               x += itemWidth + spacingX;
-               // Pro 4x4 layout - po 4 položkách přejdi na nový řádek
-               if ((counter + 1) % 4 === 0) {
-                 x = 0;
-                 y += itemHeight + spacingY;
-               }
+                 exportCounter++;
+               });
 
-               counter++;
+               doc.save("QR_kody_vyber.pdf");
+               console.log("PDF vygenerováno s", exportCounter, "QR kódy, logo:", logoDataURL ? "vloženo" : "nebylo k dispozici");
+             }).catch((error) => {
+               console.error("Chyba při generování QR kódů:", error);
+               alert("Chyba při generování PDF.");
              });
-
-             doc.save("QR_kody_vyber.pdf");
-             console.log("PDF vygenerováno s", counter, "QR kódy, logo:", logoDataURL ? "vloženo" : "nebylo k dispozici");
            }).catch((error) => {
-             console.error("Chyba při generování QR kódů:", error);
-             alert("Chyba při generování PDF.");
+             console.error("Chyba při načítání zařízení z databáze:", error);
+             alert("Chyba při načítání zařízení z databáze.");
            });
          }
          
